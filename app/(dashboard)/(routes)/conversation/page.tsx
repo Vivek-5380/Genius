@@ -20,8 +20,10 @@ import { Loader } from "@/components/loader";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const ConversationPage = () => {
+  const proModal = useProModal();
   const router = useRouter();
 
   const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([]);
@@ -52,7 +54,9 @@ const ConversationPage = () => {
 
       form.reset();
     } catch (err: any) {
-      console.error(err);
+      if (err?.response?.status === 403) {
+        proModal.onOpen(); 
+      }
     } finally {
       router.refresh();
     }
@@ -113,17 +117,17 @@ const ConversationPage = () => {
         )}
         <div className="flex flex-col-reverse gap-y-4">
           {messages.map((message) => (
-            <div 
-                key={message.content} 
-                className={cn(
-                  "p-8 w-full flex items-start gap-x-8 rounded-lg",
-                  message.role === "user" ? "bg-white border border-black/10" : "bg-muted"
-                )}
+            <div
+              key={message.content}
+              className={cn(
+                "p-8 w-full flex items-start gap-x-8 rounded-lg",
+                message.role === "user"
+                  ? "bg-white border border-black/10"
+                  : "bg-muted"
+              )}
             >
               {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-              <p className="text-sm">
-                  {message.content}
-              </p> 
+              <p className="text-sm">{message.content}</p>
             </div>
           ))}
         </div>
